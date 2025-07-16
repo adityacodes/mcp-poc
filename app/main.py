@@ -6,8 +6,11 @@ from loguru import logger
 from app.dependencies import CORS, init_db
 from app.services import init_defaults
 from dotenv import load_dotenv
-
 load_dotenv()
+
+BASE_DIR: Path = Path(__file__).resolve().parent
+UPLOAD_FOLDER = f"{BASE_DIR}/generated/uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app = FastAPI()
 
