@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from app.dependencies import CORS, init_db
-from app.services import init_defaults
+from app.service import init_defaults
 from app.routers import api_router
 from dotenv import load_dotenv
 load_dotenv()
