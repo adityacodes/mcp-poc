@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from app.dependencies import CORS, init_db
 from app.services import init_defaults
+from app.routers import api_router
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -22,10 +23,6 @@ def on_startup():
 
 CORS(app)
 
-@app.get("/")
-def hello_world():
-    return {"message": "Hello, World!"}
+app.include_router(api_router)
 
-BASE_DIR: Path = Path(__file__).resolve().parent
-UPLOAD_FOLDER = f"{BASE_DIR}/generated/uploads"
 app.mount("/api/v1/files", StaticFiles(directory=UPLOAD_FOLDER), name="files")
