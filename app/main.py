@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from app.dependencies import CORS, init_db
@@ -22,6 +23,10 @@ def on_startup():
     logger.info("Default Initialization completed")
 
 CORS(app)
+
+@app.get("/", include_in_schema=False)
+async def redirect():
+    return RedirectResponse(url="/docs")
 
 app.include_router(api_router)
 
