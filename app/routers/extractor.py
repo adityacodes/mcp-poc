@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from app.services.infoextractor import DetailExtraction
-from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import PyMuPDFLoader, UnstructuredPDFLoader
 import os
 router = APIRouter(tags=["Extractor"])
 
@@ -21,8 +21,15 @@ def funtionality(file: UploadFile = File(...)):
         
     loader = PyMuPDFLoader(filePath)
     docs = loader.load()
+    print(docs)
     for doc in docs:
-        text += doc.page_content           
+        text += doc.page_content
+    # if text == "":
+    #     loader = UnstructuredPDFLoader(filePath, strategy="ocr_only")
+    #     docss = loader.load()
+    #     for doc in docss:
+    #         text += doc.page_content
+    print(text)          
     extractr = DetailExtraction(text=text)
     aadhar, mobile = extractr.extractText()
     
