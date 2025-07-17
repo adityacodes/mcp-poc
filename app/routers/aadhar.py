@@ -10,11 +10,8 @@ from app.models import Aadhar
 
 router = APIRouter(tags=["Aadhar"])
 
-class AadharCreate(BaseModel):
-    value: str
-
 # Create
-@router.post("/aadhars/", response_model=AadharCreate)
+@router.post("/aadhars/", response_model=Aadhar)
 def create_aadhar(aadhar: Aadhar, session: Session = Depends(get_session)):
     session.add(aadhar)
     session.commit()
