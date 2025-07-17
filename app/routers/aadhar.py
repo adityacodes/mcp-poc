@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from langgraph.prebuilt import create_react_agent
 import loguru
+from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from app.dependencies import get_session
@@ -9,8 +10,11 @@ from app.models import Aadhar
 
 router = APIRouter(tags=["Aadhar"])
 
+class AadharCreate(BaseModel):
+    value: str
+
 # Create
-@router.post("/aadhars/", response_model=Aadhar)
+@router.post("/aadhars/", response_model=AadharCreate)
 def create_aadhar(aadhar: Aadhar, session: Session = Depends(get_session)):
     session.add(aadhar)
     session.commit()

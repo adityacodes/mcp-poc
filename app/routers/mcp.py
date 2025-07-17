@@ -7,14 +7,14 @@ from app.tools.validate_aadhar import validate_aadhar_number
 agent = create_react_agent(
     model="gpt-4",
     tools=[validate_aadhar_number],
-    prompt="You are a helpful assistant",
+    prompt="You are an helpful assistant",
     debug=True
 )
 
 router = APIRouter(tags=["Application"])
 
-@router.get("/")
-async def get_status(input: str = Query(...)):
+@router.get("/chat")
+async def chat_with_openai(input: str = Query(...)):
     try:
         input_message = {"role": "user", "content": input}
         response = agent.invoke({"messages": [input_message]})
