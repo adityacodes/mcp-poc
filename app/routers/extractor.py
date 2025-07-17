@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from app.services.infoextractor import DetailExtraction
-from langchain_community.document_loaders import PyMuPDFLoader, UnstructuredPDFLoader
+from langchain_community.document_loaders import PyMuPDFLoader
 import os
 router = APIRouter(tags=["Extractor"])
 
