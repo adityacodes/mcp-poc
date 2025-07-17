@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi_mcp import FastApiMCP
 from loguru import logger
 from app.dependencies import CORS, init_db
 from app.services import init_defaults
@@ -31,3 +32,6 @@ async def redirect():
 app.include_router(api_router)
 
 app.mount("/api/v1/files", StaticFiles(directory=UPLOAD_FOLDER), name="files")
+
+mcp = FastApiMCP(app)
+mcp.mount()

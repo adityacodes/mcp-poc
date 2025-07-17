@@ -18,6 +18,7 @@ ecdsa==0.19.1
 email_validator==2.2.0
 fastapi==0.115.13
 fastapi-cli==0.0.7
+fastapi-mcp==0.3.7
 frozenlist==1.7.0
 greenlet==3.2.3
 h11==0.16.0
@@ -76,6 +77,7 @@ python-jose==3.5.0
 python-multipart==0.0.20
 python-pptx==1.0.2
 pytz==2025.2
+pywin32==311
 PyYAML==6.0.2
 referencing==0.36.2
 regex==2024.11.6
