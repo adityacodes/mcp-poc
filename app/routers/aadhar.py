@@ -19,7 +19,7 @@ def create_aadhar(aadhar: Aadhar, session: Session = Depends(get_session)):
     return aadhar
 
 # Read All
-@router.get("/aadhars/", response_model=List[Aadhar])
+@router.get("/aadhars/", response_model=List[Aadhar], operation_id="get_aadhars")
 def get_aadhars(session: Session = Depends(get_session)):
     return session.exec(select(Aadhar)).all()
 
@@ -52,3 +52,10 @@ def delete_aadhar(aadhar_id: int, session: Session = Depends(get_session)):
     session.delete(aadhar)
     session.commit()
     return {"message": "Aadhar deleted"}
+
+@router.post("/validate/aadhar/{aadhar_value}", operation_id="validate_aadhar")
+def validate_aadhar(aadhar_value: str, session: Session = Depends(get_session)):
+    aadhar = session.exec(select(Aadhar).where(Aadhar.value == aadhar_value)).first()
+    if not aadhar:
+        raise HTTPException(status_code=404, detail="Aadhar not found")
+    return {"valid": True, "aadhar": aadhar}

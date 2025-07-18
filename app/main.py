@@ -33,5 +33,5 @@ app.include_router(api_router)
 
 app.mount("/api/v1/files", StaticFiles(directory=UPLOAD_FOLDER), name="files")
 
-mcp = FastApiMCP(app)
+mcp = FastApiMCP(app, include_operations=["validate_aadhar", "get_aadhars"])
 mcp.mount()
