@@ -14,7 +14,7 @@ def insert_data(aadhar: str, mobile: str):
 
 def validate_aadhar_mobile(aadhar: str, mobile: str) -> dict:
     with Session(engine) as session:
-        # Check Aadhar existence
+            # Check Aadhar existence
         aadhar_stmt = select(ExtractedData).where(ExtractedData.aadhar == aadhar)
         aadhar_result = session.exec(aadhar_stmt).first()
         aadhar_exists = aadhar_result is not None

@@ -16,6 +16,7 @@ import pytesseract
 from PIL import Image
 from io import BytesIO
 from app.database.insertinSQL import insert_data
+from app.services.manualMCP import validate_from_db
 
 # Fix import path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
@@ -196,7 +197,7 @@ class ValidationRequest(BaseModel):
     aadhar: str
     mobile: str
 
-@router.post("/validate_data_llm")
+@router.post("/validate_data_mcp")
 async def validate_data_llm(payload: ValidationRequest = Body(...)):
     try:
         async with stdio_client(server_params) as (read, write):
@@ -215,37 +216,53 @@ async def validate_data_llm(payload: ValidationRequest = Body(...)):
                 tool_choice="auto"
             )
 
-            tool_calls = response.choices[0].message.tool_calls
-            if not tool_calls:
-                return JSONResponse(status_code=400, content={"error": "No tool called by OpenAI."})
+                tool_calls = response.choices[0].message.tool_calls
+                if not tool_calls:
+                    return JSONResponse(status_code=400, content={"error": "No tool called by OpenAI."})
 
-            tool_call = tool_calls[0]
-            tool_name = tool_call.function.name
-            arguments = json.loads(tool_call.function.arguments)
-            print(tool_name, arguments)
+                tool_call = tool_calls[0]
+                tool_name = tool_call.function.name
+                arguments = json.loads(tool_call.function.arguments)
+                print(tool_name, arguments)
 
-            # Call the MCP tool (validate_from_db should now return separate flags)
-            result = await session.call_tool(tool_name, arguments=arguments)
+                # Call the MCP tool (validate_from_db should now return separate flags)
+                result = await session.call_tool(tool_name, arguments=arguments)
 
-            try:
+                # try:
                 result_dict = result.dict()
-            except AttributeError:
+                # except AttributeError:
+                #     try:
+                #         result_dict = json.loads(result.json())
+                #     except Exception:
+                #         result_dict = {
+                #             "aadhar_exists": False,
+                #             "mobile_exists": False,
+                #             "error": str(result)
+                #         }
+                
+                raw_tool_output = result_dict.get("content", [])[0].get("text", "")
                 try:
-                    result_dict = json.loads(result.json())
-                except Exception:
-                    result_dict = {
-                        "aadhar_exists": False,
-                        "mobile_exists": False,
-                        "error": str(result)
-                    }
+                    result_dict = json.loads(raw_tool_output)
+                except json.JSONDecodeError as e:
+                    return JSONResponse(content={"error": f"Failed to parse tool output: {str(e)}"}, status_code=500)
 
+                return {
+                    "aadhar": payload.aadhar,
+                    "mobile": payload.mobile,
+                    "aadhar_exists_in_database": result_dict.get("aadhar_exists", False),
+                    "mobile_exists_in_database": result_dict.get("mobile_exists", False)
+                }
+
+    except Exception as e:
+        logging.exception("MCP based data validation failed, falling in the exception block.")
+        try:
+            validation_output = validate_from_db(payload.aadhar, payload.mobile)
             return {
                 "aadhar": payload.aadhar,
                 "mobile": payload.mobile,
-                "aadhar_exists_in_database": result_dict.get("aadhar_exists", False),
-                "mobile_exists_in_database": result_dict.get("mobile_exists", False)
-            }
-
-    except Exception as e:
-        logging.exception("Validation via MCP/OpenAI failed.")
-        return JSONResponse(status_code=500, content={"error": f"MCP validation failed: {e}"})
+                "aadhar_exists_in_database": validation_output.get("aadhar_exists", False),
+                "mobile_exists_in_database": validation_output.get("mobile_exists", False)
+                }
+        except Exception as e:
+            logging.exception("Validation via MCP/OpenAI failed.")
+            return JSONResponse(status_code=500, content={"error": f"MCP validation failed: {e}"})
